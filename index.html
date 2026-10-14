@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>新生互助任務</title>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Press+Start+2P&display=swap">
+<style>
+/* 單一視覺世界：夜色校園底 + 米色像素面板；手機優先，單欄 */
+:root{
+  --night:#1f2a4d; --night2:#2e4a7d; --ink:#1d1b2f; --paper:#f6efdc; --paper2:#e8e0cc;
+  --gold:#f2b134; --gold-soft:#fbe3a6; --red:#b0413e; --red-soft:#fbe0da; --green:#2f6b3a;
+  --mute:#5a5470; --lilac:#c9c2e0; --white:#ffffff; --me:#d8f2b8; --grass:#6fb35a; --lock:#d9d3c3;
+  --f-body:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif;
+  --f-px:'Press Start 2P','Courier New',monospace;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--night);color:var(--ink);font-family:var(--f-body)}
+.app{max-width:460px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;background:var(--night);font-size:15px;line-height:1.6}
+.app.big{font-size:17.5px}
+.gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.px{border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink)}
+.pf{font-family:var(--f-px);letter-spacing:0}
+button{font:inherit;color:inherit;cursor:pointer}
+button:disabled{cursor:not-allowed}
+:focus-visible{outline:3px dashed var(--gold);outline-offset:3px}
+svg.sp{display:block;image-rendering:pixelated}
+/* top bar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--ink);color:var(--paper)}
+.bar .in{display:flex;align-items:center;gap:10px;padding-block:10px}
+.bar .t1{font-size:.8em;color:var(--lilac)}
+.bar .t2{font-weight:900;font-size:1.05em;line-height:1.3}
+.iconbtn{background:transparent;border:2px solid #4a4568;color:var(--paper);min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;padding:0 8px;font-size:.85em}
+.dots{display:flex;gap:3px}
+.dots i{width:11px;height:11px;background:#4a4568;display:block}
+.dots i.on{background:var(--gold)}
+/* panels */
+.main{flex:1;display:flex;flex-direction:column;gap:14px;padding-block:16px 24px}
+.panel{background:var(--paper);padding:14px;display:flex;flex-direction:column;gap:12px}
+h1,h2{margin:0;text-wrap:balance}
+h1{font-size:1.6em;font-weight:900;color:var(--paper);letter-spacing:.04em}
+h2{font-size:1.15em;font-weight:900}
+.lead{color:var(--lilac);margin:0}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;background:var(--gold);color:var(--ink);border:3px solid var(--ink);box-shadow:4px 4px 0 var(--ink);min-height:50px;padding:8px 14px;font-weight:900;font-size:1.05em;width:100%}
+.btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--ink)}
+.btn:disabled{background:#b8b1c9;color:#4a4568;box-shadow:none}
+.btn.ghost{background:var(--paper2)}
+.btn.small{min-height:46px;font-size:.95em;width:auto}
+.field{display:flex;flex-direction:column;gap:6px}
+.field label{font-weight:700;font-size:.95em}
+.field input{font:inherit;font-size:1.05em;border:3px solid var(--ink);background:var(--white);color:var(--ink);padding:10px 12px;min-height:48px;border-radius:0}
+.err{color:var(--red);font-weight:700;font-size:.9em;margin:0}
+.note{font-size:.85em;color:var(--mute);margin:0}
+.ribbon{background:var(--red);color:var(--white);font-size:.8em;font-weight:700;text-align:center;padding:6px 10px}
+ul.rules{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
+.check{display:flex;gap:10px;align-items:flex-start;font-weight:700}
+.check input{width:22px;height:22px;margin-top:3px;accent-color:var(--ink)}
+/* avatar */
+.avs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.av{background:var(--white);border:3px solid var(--ink);padding:12px;display:flex;flex-direction:column;align-items:center;gap:6px;font-weight:700}
+.av[aria-pressed="true"]{background:var(--gold-soft);box-shadow:4px 4px 0 var(--ink)}
+/* dialogue */
+.talk{display:flex;gap:12px;align-items:flex-start}
+.portrait{flex:none;border:3px solid var(--ink);background:var(--paper2)}
+.who{font-size:.8em;font-weight:900;color:var(--red)}
+.say{font-size:1.02em}
+/* map */
+.map{position:relative;height:440px;background:var(--grass);background-image:repeating-linear-gradient(0deg,transparent 0 14px,rgba(0,0,0,.05) 14px 16px),repeating-linear-gradient(90deg,transparent 0 14px,rgba(0,0,0,.05) 14px 16px);border-block:3px solid var(--ink);overflow:hidden}
+.map svg.path{position:absolute;inset:0;width:100%;height:100%}
+.tile{position:absolute;display:flex;align-items:center;gap:6px;background:none;border:0;padding:0;text-align:left;color:var(--ink)}
+.tile .lab{background:var(--paper);border:3px solid var(--ink);box-shadow:3px 3px 0 var(--ink);padding:4px 9px;display:flex;flex-direction:column;line-height:1.35}
+.tile .n{font-weight:900;font-size:.92em}
+.tile .s{font-size:.75em;font-weight:700}
+.tile.done .s{color:var(--green)}
+.tile.now .lab{background:var(--gold)}
+.tile.lock{opacity:.7}
+.tile.lock .lab{background:var(--lock)}
+.tile.lock .s{color:var(--mute)}
+/* chapter */
+.scene{background:var(--paper2);border-bottom:3px solid var(--ink)}
+.scene svg{width:100%;height:auto}
+.ctx{display:flex;flex-direction:column;gap:10px}
+.bub{display:flex;gap:8px;align-items:flex-end;max-width:100%}
+.bub .who2{font-size:.72em;font-weight:700;color:var(--mute);margin-bottom:2px}
+.bub .tx{background:var(--white);border:3px solid var(--ink);padding:8px 11px;min-width:0}
+.bub.me{justify-content:flex-end}
+.bub.me .tx{background:var(--me)}
+.card{background:var(--paper2);border:3px dashed var(--ink);padding:10px 12px}
+.card .lb{font-size:.72em;font-weight:900;color:var(--red);letter-spacing:.1em}
+.clue{background:var(--gold-soft);border:3px solid var(--ink);padding:10px 12px}
+.task{background:var(--ink);color:var(--paper);padding:10px 12px}
+.task b{color:var(--gold)}
+.opts{display:flex;flex-direction:column;gap:9px}
+.opt{display:flex;gap:10px;align-items:center;text-align:left;background:var(--white);border:3px solid var(--ink);padding:9px 12px;min-height:48px}
+.opt .k{font-family:var(--f-px);font-size:.65em;color:var(--mute);flex:none;width:22px}
+.opt[aria-pressed="true"]{background:var(--gold-soft);box-shadow:4px 4px 0 var(--ink)}
+.opt[aria-pressed="true"] .k{color:var(--ink)}
+.chat{border:3px solid var(--ink);background:#9fbcd8}
+.chat .hd{background:#3f6e9a;color:var(--white);padding:6px 12px;font-weight:700;font-size:.85em;display:flex;justify-content:space-between}
+.chat .bd{padding:12px;display:flex;flex-direction:column;gap:9px}
+.line{display:flex;gap:8px;align-items:flex-end}
+.line.me{justify-content:flex-end}
+.line button{text-align:left;background:var(--white);border:3px solid var(--ink);padding:8px 10px;min-height:44px;max-width:85%}
+.line.me button{background:var(--me)}
+.line button[aria-pressed="true"]{background:var(--gold-soft);outline:3px dashed var(--red);outline-offset:3px}
+.line .nm{font-size:.7em;font-weight:700;color:var(--ink);display:block}
+.ev{background:var(--paper);border:3px solid var(--ink);padding:9px 11px;display:flex;flex-direction:column;gap:8px}
+.ev .no{font-family:var(--f-px);font-size:.6em;color:var(--mute)}
+.tags{display:flex;gap:6px}
+.tag{flex:1;min-height:42px;background:var(--white);border:3px solid var(--ink);font-weight:700;font-size:.88em;padding:2px 4px}
+.tag[aria-pressed="true"]{background:var(--ink);color:var(--gold)}
+.foot{position:sticky;bottom:0;background:var(--paper);border-top:3px solid var(--ink);padding-block:12px calc(12px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:6px}
+.foot .row{display:flex;gap:10px}
+.foot .row .btn:last-child{flex:1}
+.chbody{background:var(--paper);flex:1;display:flex;flex-direction:column;gap:12px;padding-block:16px}
+/* overlay */
+.ov{position:fixed;inset:0;z-index:20;background:rgba(15,18,38,.78);display:flex;align-items:flex-end;justify-content:center}
+.ov .sheet{background:var(--paper);width:100%;max-width:460px;max-height:85%;overflow:auto;border-top:4px solid var(--ink);padding-block:16px calc(16px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px}
+/* review */
+.grid{display:flex;flex-direction:column;gap:10px}
+.grow{display:flex;align-items:center;gap:8px}
+.grow .cn{width:5.6em;font-weight:700;font-size:.85em;flex:none}
+.qs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;flex:1}
+.qb{font-family:var(--f-px);font-size:.65em;min-height:44px;border:3px solid var(--ink);background:var(--gold);color:var(--ink)}
+.qb.miss{background:var(--red);color:var(--white)}
+.warn{background:var(--red-soft);border:3px solid var(--red);padding:9px 12px;color:#6e1f1a}
+.ok{background:#e1f2d8;border:3px solid var(--green);padding:9px 12px;color:#1f4a28}
+/* result */
+.score{display:flex;align-items:baseline;gap:8px}
+.score .big{font-family:var(--f-px);font-size:2em}
+.cs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;text-align:center;font-size:.8em}
+.cs div{background:var(--white);border:2px solid var(--ink);padding:6px 2px;font-variant-numeric:tabular-nums}
+.ritem{border-top:2px dashed var(--mute);padding-top:10px;display:flex;flex-direction:column;gap:4px}
+.ritem .h{display:flex;justify-content:space-between;font-weight:900}
+.good{color:var(--green)} .bad{color:var(--red)}
+.badge{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+@media (prefers-reduced-motion:no-preference){
+  .pop{animation:pop .25s steps(3) both}
+  @keyframes pop{from{transform:translateY(6px);opacity:.3}to{transform:none;opacity:1}}
+}
+</style>
+<style>
+body{margin:0}
+.savest{font-size:.85em;color:var(--lilac);white-space:nowrap}
+.savest.err{color:var(--gold)}
+.ribbon.teach{background:var(--night2)}
+</style>
+</head>
+<body>
+<div id="app" class="app"></div>
+<script>
+/* Apps Script 部署網址（資料 API）。若日後重新「新增部署作業」導致網址改變，只要改這一行。 */
+var API_URL = 'https://script.google.com/macros/s/AKfycbxLDZIMOD0JnJZb-Zme4D33iydA3M5xt07Npgcoo8Fvev_W8Yk/exec';
+</script>
+<script>
+(function(){
+'use strict';
+/* ---------- 像素圖 ---------- */
+function sprite(rows, pal, w){
+  var h = w * rows.length / rows[0].length, s = '';
+  rows.forEach(function(r, y){ for (var x = 0; x < r.length; x++){ var c = pal[r[x]]; if (c) s += '<rect x="'+x+'" y="'+y+'" width="1.04" height="1.04" fill="'+c+'"/>'; } });
+  return '<svg class="sp" viewBox="0 0 '+rows[0].length+' '+rows.length+'" width="'+w+'" height="'+h+'" aria-hidden="true" shape-rendering="crispEdges">'+s+'</svg>';
+}
+var SHORT = ["..HHHHHH..",".HHHHHHHH.",".HSSSSSSH.",".SSESSESS.",".SSSSSSSS.","..SSMMSS..","...SSSS...","..TTTTTT..",".TTTTTTTT.",".TTTTTTTT."];
+var LONG  = ["..HHHHHH..",".HHHHHHHH.","HHSSSSSSHH","HSSESSESSH","HSSSSSSSSH","HHSSMMSSHH","HH.SSSS.HH","..TTTTTT..",".TTTTTTTT.",".TTTTTTTT."];
+var CAST = {
+  yun:{n:'芸姊',long:1,h:'#2a1f2e',t:'#b0413e',bg:'#e6b980'},
+  pinyu:{n:'品妤',long:1,h:'#4a2f24',t:'#6b8fd6',bg:'#c9d6f0'},
+  xiaoqing:{n:'小晴',long:1,h:'#1d1b2f',t:'#e07a9a',bg:'#f5cfdb'},
+  wenwen:{n:'文文',long:0,h:'#8a5a2b',t:'#7cc29a',bg:'#d3eedc'},
+  azhe:{n:'阿哲',long:0,h:'#1d1b2f',t:'#4f9d8b',bg:'#cfe7e0'},
+  jiaqi:{n:'佳琪',long:1,h:'#6b3a2a',t:'#e0a020',bg:'#f6e2b0'},
+  akai:{n:'阿凱',long:0,h:'#2b2b2b',t:'#3f6e9a',bg:'#cddcec'},
+  zihao:{n:'子豪',long:0,h:'#5a3a1a',t:'#d9773a',bg:'#f3d6c0'},
+  senior:{n:'社團學長',long:0,h:'#1d1b2f',t:'#6b4c8a',bg:'#ddd0ea'},
+  yuxiang:{n:'宇翔',long:0,h:'#c06030',t:'#3a3355',bg:'#d8d4e6'},
+  fa:{n:'朋友 A',long:1,h:'#3b2a1e',t:'#9a7bd0',bg:'#e3daf3'},
+  fb:{n:'朋友 B',long:0,h:'#3b2a1e',t:'#6a9a3a',bg:'#dcebc8'}
+};
+var AVATARS = [
+  {id:'a1',n:'短髮・綠',long:0,h:'#3b2a1e',t:'#4f9d8b',bg:'#cfe7e0'},
+  {id:'a2',n:'長髮・紅',long:1,h:'#1d1b2f',t:'#b0413e',bg:'#f3d0cc'},
+  {id:'a3',n:'短髮・藍',long:0,h:'#7a4a22',t:'#3f6e9a',bg:'#cddcec'},
+  {id:'a4',n:'長髮・黃',long:1,h:'#5a3a2a',t:'#e0a020',bg:'#f6e2b0'}
+];
+function face(c, w){
+  return '<span class="portrait" style="display:block;background:'+c.bg+'">'+sprite(c.long?LONG:SHORT,{H:c.h,S:'#f2c9a0',E:'#1d1b2f',M:'#c96a5a',T:c.t},w)+'</span>';
+}
+function me(){ return AVATARS.filter(function(a){return a.id===S.av;})[0] || AVATARS[0]; }
+var BLD = ["..............",".RRRRRRRRRRRR.",".RRRRRRRRRRRR.","..WWWWWWWWWW..","..WBBWWWWBBW..","..WBBWWWWBBW..","..WWWWWWWWWW..","..WWWWDDWWWW..","..WWWWDDWWWW..","KKKKKKKKKKKKKK"];
+function building(roof, w){ return sprite(BLD,{R:roof,W:'#f1e6c8',B:'#7fb7d6',D:'#5a3a2a',K:'#1d1b2f'},w); }
+var BADGE = ["...GGGG...","..GYYYYG..",".GYYWYYYG.","GYYWWWYYYG","GYYYWYYYYG","GYYYYYYYYG",".GYYYYYYG.","..GYYYYG..","...RRRR...","..RR..RR.."];
+function badge(w){ return sprite(BADGE,{G:'#1d1b2f',Y:'#f2b134',W:'#fff6d6',R:'#b0413e'},w); }
+function scene(rects){
+  var s = rects.map(function(r){return '<rect x="'+r[0]+'" y="'+r[1]+'" width="'+r[2]+'" height="'+r[3]+'" fill="'+r[4]+'"/>';}).join('');
+  return '<svg viewBox="0 0 60 16" shape-rendering="crispEdges" aria-hidden="true" preserveAspectRatio="xMidYMid slice" style="display:block;width:100%;height:96px">'+s+'</svg>';
+}
+
+
+var Q = {}, QIDS = [], BOOT = {rules:{}};
+/* ---------- 章節 ---------- */
+var CH = [
+ {id:'c1',place:'社團教室',who:'pinyu',roof:'#8a5a44',badge:'自我覺察徽章',map:'第一張求助卡來自品妤。社團聚會後，她好像有心事。',
+  scene:[[0,0,60,11,'#e8dcc0'],[0,11,60,5,'#b58a5c'],[6,2,16,7,'#c98d4f'],[8,3,4,3,'#ffffff'],[14,4,5,3,'#f2d46b'],[40,2,8,6,'#9fd0e8'],[50,2,8,6,'#9fd0e8'],[20,12,20,2,'#7a5230']],
+  steps:[{say:'yun',t:'品妤是你們班的同學，個性比較慢熱。社團第一次聚會後，群組裡有人聊到她。'},{q:'q1'},{say:'pinyu',t:'（私訊）我其實很想認識大家，可是每次都開不了口。'},{q:'q2'},{clue:'pinyu',t:'大家已經聊開的時候，我不知道怎麼插進去，怕打斷別人。'},{q:'q3'},{say:'yun',t:'聚會上大家都在聊 MBTI 和 DISC。整理一下：哪些話是在描述自己，哪些是在貼標籤？'},{q:'q4'}]},
+ {id:'c2',place:'教室',who:'xiaoqing',roof:'#b0413e',badge:'傾聽徽章',map:'第二張求助卡來自小晴。她剛下課，好像很沮喪，在教室等你。',
+  scene:[[0,0,60,11,'#e8dcc0'],[0,11,60,5,'#c9a77a'],[6,2,28,7,'#2f5a4a'],[5,1,30,1,'#8a5a44'],[8,4,8,1,'#e8e8e8'],[8,6,14,1,'#e8e8e8'],[42,2,7,6,'#9fd0e8'],[51,2,7,6,'#9fd0e8'],[4,13,12,2,'#8a5a44'],[24,13,12,2,'#8a5a44'],[44,13,12,2,'#8a5a44']],
+  steps:[{say:'yun',t:'小晴剛下課，在 LINE 傳了訊息給你。'},{q:'q5'},{clue:'xiaoqing',t:'老師示範完之後要我們自己做，我不知道要從哪一步開始。'},{q:'q6'},{say:'yun',t:'小晴後來也跟室友文文說了這件事。我們來看看她們的對話。'},{q:'q7'},{say:'yun',t:'隔天，你想關心小晴的作業進度。'},{q:'q8'}]},
+ {id:'c3',place:'活動中心',who:'azhe',roof:'#3f6e9a',badge:'觀察徽章',map:'第三張求助卡在活動中心。迎新剛結束，阿哲好像怪怪的。',
+  scene:[[0,0,60,11,'#f1e2c4'],[0,11,60,5,'#8fb3c9'],[10,2,40,4,'#b0413e'],[14,3,3,2,'#f6efdc'],[20,3,3,2,'#f6efdc'],[26,3,3,2,'#f6efdc'],[32,3,3,2,'#f6efdc'],[38,3,3,2,'#f6efdc'],[44,3,3,2,'#f6efdc'],[0,9,60,2,'#7a5230']],
+  steps:[{say:'yun',t:'這一章用「場景卡」記錄看到、聽到的事。先分清楚哪些是線索，哪些是推測。'},{q:'q9'},{q:'q10'},{say:'yun',t:'幾天後，你和佳琪在同一組做報告。'},{q:'q11'},{q:'q12'}]},
+ {id:'c4',place:'討論室',who:'jiaqi',roof:'#4f9d8b',badge:'換位思考徽章',map:'第四張求助卡來自分組組長佳琪。組員阿凱已讀不回。',
+  scene:[[0,0,60,11,'#dfe6ee'],[0,11,60,5,'#a0886c'],[6,2,22,7,'#ffffff'],[5,1,24,1,'#9aa3ad'],[8,4,10,1,'#3f6e9a'],[8,6,6,1,'#b0413e'],[18,12,24,3,'#6b4c3a'],[50,5,4,6,'#4f9d8b'],[51,11,2,2,'#7a5230']],
+  steps:[{say:'jiaqi',t:'阿凱已讀不回好久了，我真的很火大。你可以幫我看看嗎？'},{q:'q13'},{q:'q14'},{clue:'akai',t:'抱歉！我週間在餐廳打工到晚上 10 點，下班才看手機，昨天太累就睡著了。簡報我可以做，但要等週末才有完整的時間。'},{q:'q15'},{say:'yun',t:'事情解決後，佳琪在朋友群組聊到這件事。'},{q:'q16'}]},
+ {id:'c5',place:'宿舍',who:'yuxiang',roof:'#6b4c8a',badge:'界線徽章',map:'最後一張求助卡在宿舍。這週好多人來拜託你事情。',
+  scene:[[0,0,60,11,'#e6dcf0'],[0,11,60,5,'#b5946c'],[4,3,18,2,'#7a5230'],[4,5,18,2,'#f6efdc'],[4,9,18,2,'#7a5230'],[4,11,18,1,'#9fd0e8'],[4,3,1,10,'#5a3a2a'],[21,3,1,10,'#5a3a2a'],[34,8,16,2,'#7a5230'],[44,5,3,3,'#1d1b2f'],[46,2,2,2,'#f2b134'],[49,1,2,2,'#f2b134'],[52,2,6,5,'#2e4a7d'],[36,5,2,3,'#f2d46b']],
+  steps:[{say:'zihao',t:'（LINE）拜託啦，這次作業你幫我寫完整份，我這週打工排滿了，下次請你吃飯！'},{q:'q17'},{say:'senior',t:'週五晚上要不要一起去夜唱？大家都會去喔！'},{q:'q18'},{say:'yun',t:'回到宿舍，已經半夜 12 點多，室友宇翔還在放音樂。'},{q:'q19'},{clue:'yuxiang',t:'啊，我以為你已經睡了沒差！我在準備社團表演，要跟著音樂練動作，戴耳機不好練。'},{q:'q20'}]}
+];
+function chOf(id){ for (var i=0;i<CH.length;i++) if (CH[i].id===id) return i; return -1; }
+function qNum(id){ return QIDS.indexOf(id)+1; }
+function chQs(i){ return CH[i].steps.filter(function(s){return s.q;}).map(function(s){return s.q;}); }
+function answered(id){ var a=S.ans[id], q=Q[id]; if (a===undefined||a===null) return false; if (q.kind==='sort') return Object.keys(a).length===q.cards.length; return true; }
+function chDone(i){ return chQs(i).every(answered); }
+function chOpen(i){ return i===0 || chDone(i-1); }
+function doneCount(){ var n=0; for (var i=0;i<CH.length;i++) if (chDone(i)) n++; return n; }
+function allDone(){ return QIDS.every(answered); }
+
+
+/* ---------- 選項隨機（依學號固定，每次進入順序相同） ---------- */
+function hash(str){ var h=1779033703^str.length; for (var i=0;i<str.length;i++){ h=Math.imul(h^str.charCodeAt(i),3432918353); h=h<<13|h>>>19; } return function(){ h=Math.imul(h^(h>>>16),2246822507); h=Math.imul(h^(h>>>13),3266489909); return (h^=h>>>16)>>>0; }; }
+function order(qid){ var q=Q[qid], r=hash(S.sid+'|'+qid), a=q.opts.map(function(o){return o;}); for (var i=a.length-1;i>0;i--){ var j=r()%(i+1), t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+
+/* ---------- 狀態 ---------- */
+var PREVIEW = false, PREVIEW_KEY = '';
+try{ PREVIEW_KEY = new URLSearchParams(location.search).get('preview') || ''; }catch(e){}
+var S = {view:'loading',sid:'',name:'',tok:null,av:null,ans:{},ch:0,step:0,mode:'play',pstep:0,practice:null,
+  submittedAt:null,code:null,result:null,big:false,agreed:false,sel:null,overlay:false,confirm:false,err:'',busy:false,
+  queue:[],saving:false,saveState:'idle',fatal:null};
+try{ S.big = localStorage.getItem('nkuht-mid-big')==='1'; }catch(e){}
+function esc(s){ return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+
+/* ---------- 與伺服器溝通 ---------- */
+function api(fn){
+  var args=[].slice.call(arguments,1);
+  return fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn:fn,args:args}),redirect:'follow',credentials:'omit',cache:'no-store'})
+    .then(function(r){ if (!r.ok) throw new Error('http '+r.status); return r.json(); });
+}
+var SAVE_TEXT={idle:'',saving:'存檔中…',saved:'已存檔',error:'網路不穩，重試中…'};
+function setSave(st){ S.saveState=st; var els=document.querySelectorAll('[data-save]'); for (var i=0;i<els.length;i++){ els[i].textContent=SAVE_TEXT[st]; els[i].className='savest'+(st==='error'?' err':''); } updSubmitBtn(); }
+function enqueue(job){
+  if (PREVIEW) return;
+  S.queue=S.queue.filter(function(j){return j.key!==job.key || j===S.queue[0]&&S.saving;});
+  S.queue.push(job); setSave('saving'); pump();
+}
+function pump(){
+  if (S.saving || !S.queue.length || S.fatal) return;
+  S.saving=true;
+  var job=S.queue[0];
+  api.apply(null,[job.fn].concat(job.args)).then(function(r){
+    S.saving=false;
+    if (r && r.ok){ S.queue.shift(); setSave(S.queue.length?'saving':'saved'); pump(); }
+    else if (r && r.code==='busy'){ retry(); }
+    else { S.queue=[]; S.fatal=(r&&r.msg)||'存檔失敗，請重新登入。'; render(); }
+  }).catch(function(){ S.saving=false; retry(); });
+}
+function retry(){ setSave('error'); setTimeout(pump,3000); }
+function pending(){ return S.queue.length>0 || S.saving; }
+function updSubmitBtn(){ var b=document.getElementById('askconf'); if (b && S.view==='review'){ var miss=QIDS.filter(function(id){return !answered(id);}).length; b.disabled = miss>0 || pending(); b.textContent = miss ? '正式提交（尚有 '+miss+' 題未完成）' : (pending()?'存檔中，請稍候…':'正式提交 ▶'); } }
+
+/* ---------- 共用片段 ---------- */
+function topbar(sub, title, right){
+  return '<header class="bar"><div class="in gut">'+right.left+
+    '<div style="flex:1;min-width:0"><div class="t1">'+sub+'　<span class="savest'+(S.saveState==='error'?' err':'')+'" data-save>'+SAVE_TEXT[S.saveState]+'</span></div><div class="t2">'+title+'</div></div>'+
+    right.r+'<button class="iconbtn" data-act="font" aria-label="切換字級">'+(S.big?'標準字':'大字')+'</button></div></header>';
+}
+function progressDots(){ var s='<div class="dots" aria-label="已完成 '+doneCount()+' 章，共 5 章">'; for (var i=0;i<5;i++) s+='<i class="'+(chDone(i)?'on':'')+'"></i>'; return s+'</div>'; }
+function bubble(c){
+  if (c.card) return '<div class="card"><div class="lb">場景卡</div>'+esc(c.card)+'</div>';
+  if (c.me) return '<div class="bub me"><div class="tx">'+esc(c.t)+'</div></div>';
+  var p=CAST[c.who];
+  return '<div class="bub">'+face(p,32)+'<div style="min-width:0"><div class="who2">'+p.n+'</div><div class="tx">'+esc(c.t)+'</div></div></div>';
+}
+
+/* ---------- 畫面 ---------- */
+function vLoading(){
+  return '<div class="main gut" style="justify-content:center;align-items:center;text-align:center"><div class="pf" style="color:var(--gold);font-size:.7em">MIDTERM QUEST</div><h1>新生互助任務</h1><p class="lead">載入中…</p></div>';
+}
+function vLoadErr(){
+  return '<div class="main gut" style="justify-content:center"><div class="panel px"><h2>連不上伺服器</h2><p style="margin:0">請確認網路連線，再按一次「重新載入」。如果一直無法載入，請截圖告訴老師。</p><button class="btn" data-act="boot">重新載入</button></div></div>';
+}
+function vLogin(){
+  return '<div class="main gut" style="justify-content:center">'+
+   '<div style="display:flex;gap:10px;align-items:flex-end">'+face(AVATARS[0],56)+face(CAST.yun,56)+face(AVATARS[1],56)+'</div>'+
+   '<div><div class="pf" style="color:var(--gold);font-size:.7em;margin-bottom:8px">MIDTERM QUEST</div><h1>新生互助任務</h1>'+
+   '<p class="lead">人際關係與溝通技巧・期中評量</p></div>'+
+   '<form class="panel px" id="login" novalidate>'+
+   (PREVIEW?'<div class="ribbon teach">教師試玩模式：不比對名單、不受時段限制，作答不會寫入成績</div>':'')+
+   '<div class="field"><label for="sid">學號</label><input id="sid" name="sid" autocomplete="off" autocapitalize="characters" value="'+esc(S.sid)+'"></div>'+
+   '<div class="field"><label for="sname">姓名</label><input id="sname" name="sname" autocomplete="off" value="'+esc(S.name)+'"></div>'+
+   (S.err?'<p class="err" role="alert">'+esc(S.err)+'</p>':'')+
+   '<button class="btn" type="submit" '+(S.busy?'disabled':'')+'>'+(S.busy?'登入中…':'進入任務 ▶')+'</button>'+
+   '<p class="note">請輸入修課名單上的學號與姓名。同一個學號再次進入，會從上次存檔的地方繼續。</p></form></div>';
+}
+function vRules(){
+  var w=BOOT.rules&&BOOT.rules.window, ref=BOOT.rules&&BOOT.rules.reference;
+  return topbar('期中評量','作答須知',{left:'',r:''})+
+   '<div class="main gut"><div class="panel px">'+
+   '<ul class="rules">'+
+   (w?'<li><b>'+esc(w)+'</b></li>':'')+
+   '<li>共五章、20 題，每題 5 分，總分 100 分，答錯不倒扣。</li>'+
+   '<li>題型有三種：選一句回覆、點選對話中的一句、替證物卡貼標籤（每張 1 分）。</li>'+
+   '<li>每題送出就會自動存檔；斷線後用同一個學號進入，可以接著作答。</li>'+
+   '<li>作答過程不會顯示對錯。全部完成後，到檢查頁確認再正式提交。</li>'+
+   '<li>每個學號只能正式提交一次，提交後不能修改。</li>'+
+   (ref?'<li><b>'+esc(ref)+'</b></li>':(w?'':'<li>開放時段與可參考的資料，依老師公告為準。</li>'))+
+   '<li>故事人物都是虛構的，不需要分享自己的經驗。</li></ul>'+
+   '<label class="check" for="agree"><input type="checkbox" id="agree" '+(S.agreed?'checked':'')+'> 我已了解作答須知</label>'+
+   '<button class="btn" data-act="toAvatar" '+(S.agreed?'':'disabled')+'>開始 ▶</button></div></div>';
+}
+function vAvatar(){
+  var s=AVATARS.map(function(a){ return '<button class="av" data-act="av" data-id="'+a.id+'" aria-pressed="'+(S.av===a.id)+'">'+face(a,64)+'<span>'+a.n+'</span></button>'; }).join('');
+  return topbar('見習小幫手','選擇你的外觀',{left:'',r:''})+
+   '<div class="main gut"><p class="lead">只會改變畫面上的頭像，不影響題目與分數。</p><div class="avs">'+s+'</div>'+
+   '<button class="btn" data-act="toPrologue" '+(S.av?'':'disabled')+'>就是這個 ▶</button></div>';
+}
+var PRO = [
+ {say:'yun',t:'歡迎來到新生互助小站！我是大三的芸姊，負責帶見習小幫手。'},
+ {say:'yun',t:'這一週會有五位同學送來求助卡。每完成一張，地圖就會點亮一個地點。'},
+ {say:'yun',t:'回覆時，題目會說明你的目標。選最符合那個目標的一句，不是猜對方最開心的那句。'},
+ {practice:1},
+ {say:'yun',t:'練習結束。正式題目送出後不會顯示對錯，提交前都可以回來修改。出發吧！'}
+];
+var PQ = {task:'練習：學妹說把你借她的筆記弄丟了。你想先讓她知道你接收到她的心情。選一句，再按「送出這句」。',
+  ctx:[{who:'fa',t:'對不起！我把你借我的筆記弄丟了，我真的很慌……'}],
+  opts:[['A','聽起來你很慌，先別急，我們想想辦法。'],['B','蛤？那是我整理很久的耶。'],['C','好喔。']]};
+function vPrologue(){
+  var st=PRO[S.pstep], body;
+  if (st.practice){
+    var o=PQ.opts.map(function(x){ return '<button class="opt" data-act="psel" data-id="'+x[0]+'" aria-pressed="'+(S.practice===x[0])+'"><span class="k">'+x[0]+'</span><span>'+esc(x[1])+'</span></button>'; }).join('');
+    body='<div class="chbody gut"><div class="ctx">'+PQ.ctx.map(bubble).join('')+'</div><div class="task">'+esc(PQ.task)+'</div><div class="opts">'+o+'</div></div>'+
+     '<div class="foot gut"><button class="btn" data-act="pnext" '+(S.practice?'':'disabled')+'>送出這句 ▶</button><p class="note" style="text-align:center">練習題不計分</p></div>';
+  } else {
+    body='<div class="chbody gut"><div class="talk pop">'+face(CAST[st.say],64)+'<div style="min-width:0"><div class="who">'+CAST[st.say].n+'・互助小站</div><div class="say">'+esc(st.t)+'</div></div></div></div>'+
+     '<div class="foot gut"><button class="btn" data-act="pnext">'+(S.pstep===PRO.length-1?'打開校園地圖 ▶':'繼續 ▶')+'</button></div>';
+  }
+  return topbar('序章','新生互助小站',{left:face(me(),36),r:''})+'<div class="scene">'+scene([[0,0,60,11,'#f1e6c8'],[0,11,60,5,'#c9a77a'],[8,2,14,6,'#f2b134'],[10,4,10,1,'#1d1b2f'],[40,2,8,6,'#9fd0e8'],[50,2,8,6,'#9fd0e8'],[24,12,14,2,'#8a5a44']])+'</div>'+body;
+}
+function vMap(){
+  var pos=[[4,3],[50,21],[4,41],[50,59],[4,77]], tiles='';
+  CH.forEach(function(c,i){
+    var done=chDone(i), open=chOpen(i), cls=done?'done':(open?'now':'lock');
+    var st=done?'已完成・'+CAST[c.who].n.replace('社團','') : (open?'▶ 前往':'未解鎖');
+    tiles+='<button class="tile '+cls+'" style="left:'+pos[i][0]+'%;top:'+pos[i][1]+'%" data-act="enter" data-i="'+i+'" '+(open?'':'disabled')+' aria-label="第'+(i+1)+'章 '+c.place+'，'+st+'">'+building(c.roof,52)+
+      '<span class="lab"><span class="n">'+(i+1)+'・'+c.place+'</span><span class="s">'+st+'</span></span></button>';
+  });
+  var next=-1; for (var i=0;i<CH.length;i++){ if (!chDone(i)){ next=i; break; } }
+  var line=next<0?'五張求助卡都完成了！到互助小站檢查見習報告，再正式提交。':CH[next].map;
+  var act=next<0?'<button class="btn" data-act="review">前往檢查頁 ▶</button>':'<button class="btn" data-act="enter" data-i="'+next+'">前往'+CH[next].place+' ▶</button>';
+  return topbar((PREVIEW?'教師試玩・':'')+esc(S.sid),'新生互助任務',{left:face(me(),36),r:'<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><span class="pf" style="font-size:.6em;color:var(--gold)">'+doneCount()+' / 5</span>'+progressDots()+'</div>'})+
+   '<div class="map"><svg class="path" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><polyline points="16,10 64,28 16,48 64,66 16,84" fill="none" stroke="#e8d7a6" stroke-width="14" vector-effect="non-scaling-stroke" stroke-linejoin="miter"/></svg>'+tiles+'</div>'+
+   '<div class="main gut" style="padding-top:14px"><div class="panel px"><div class="talk">'+face(CAST.yun,48)+'<div style="min-width:0"><div class="who">芸姊・互助小站</div><div class="say">'+line+'</div></div></div>'+act+
+   (doneCount()>0&&next>=0?'<button class="btn ghost small" data-act="review" style="width:100%">查看作答進度</button>':'')+'</div></div>';
+}
+function curStep(){ return CH[S.ch].steps[S.step]; }
+function vChapter(){
+  var c=CH[S.ch], st=curStep(), qs=chQs(S.ch), head, body, foot;
+  var sub='第'+'一二三四五'[S.ch]+'章・'+c.place;
+  if (st.q){
+    var q=Q[st.q], k=qs.indexOf(st.q)+1;
+    head=topbar(sub,'第 '+qNum(st.q)+' 題',{left:'<button class="iconbtn" data-act="'+(S.mode==='edit'?'review':'map')+'" aria-label="'+(S.mode==='edit'?'回到檢查頁':'回到地圖')+'">◀</button>',r:'<span class="pf" style="font-size:.6em;color:var(--gold)">'+k+'/4</span>'});
+    body='<div class="chbody gut">'+(q.ctx.length?'<div class="ctx">'+q.ctx.map(bubble).join('')+'</div>':'')+'<div class="task"><b>任務　</b>'+esc(q.task)+'</div>'+qBody(st.q)+'</div>';
+    var ready=S.sel!==null && (q.kind!=='sort' || Object.keys(S.sel).length===q.cards.length);
+    var label=q.kind==='choice'?'送出這句':(q.kind==='tap'?'確認這句':'送出標記');
+    if (S.mode==='edit') label='儲存並回到檢查頁';
+    foot='<div class="foot gut"><div class="row"><button class="btn ghost small" data-act="ctx">重看情境</button><button class="btn" data-act="submitq" '+(ready?'':'disabled')+'>'+label+' ▶</button></div>'+
+      (q.kind==='sort'?'<p class="note" style="text-align:center">已標記 '+(S.sel?Object.keys(S.sel).length:0)+' / '+q.cards.length+'　全部標完才能送出</p>':'<p class="note" style="text-align:center">送出後自動存檔，提交前都能回來修改</p>')+'</div>';
+  } else {
+    var who=st.say||st.clue, p=CAST[who];
+    head=topbar(sub,CAST[c.who].n+'的求助卡',{left:'<button class="iconbtn" data-act="map" aria-label="回到地圖">◀</button>',r:''});
+    body='<div class="scene">'+scene(c.scene)+'</div><div class="chbody gut">'+
+      (st.clue?'<div class="pf" style="font-size:.65em;color:var(--red)">NEW CLUE</div>':'')+
+      '<div class="'+(st.clue?'clue':'')+' talk pop">'+face(p,64)+'<div style="min-width:0"><div class="who">'+p.n+(st.clue?'・新線索':'')+'</div><div class="say">'+esc(st.t)+'</div></div></div></div>';
+    foot='<div class="foot gut"><button class="btn" data-act="next">繼續 ▶</button></div>';
+  }
+  return head+body+foot+(S.overlay?vOverlay():'');
+}
+function qBody(id){
+  var q=Q[id];
+  if (q.kind==='choice'){
+    return '<div class="opts" role="group" aria-label="選項">'+order(id).map(function(o,i){ return '<button class="opt" data-act="sel" data-v="'+o[0]+'" aria-pressed="'+(S.sel===o[0])+'"><span class="k">'+'ABCD'[i]+'</span><span>'+esc(o[1])+'</span></button>'; }).join('')+'</div>';
+  }
+  if (q.kind==='tap'){
+    var ls=q.lines.map(function(l,i){
+      var nm=l.me?'':'<span class="nm">'+CAST[l.who].n+'</span>';
+      return '<div class="line'+(l.me?' me':'')+'">'+(l.me?'':face(CAST[l.who],28))+'<button data-act="sel" data-v="'+i+'" aria-pressed="'+(S.sel===i)+'">'+nm+esc(l.t)+'</button></div>';
+    }).join('');
+    return '<div class="chat"><div class="hd"><span>'+esc(q.chat)+'</span><span>點一句</span></div><div class="bd">'+ls+'</div></div>';
+  }
+  return '<div class="ctx">'+q.cards.map(function(c,i){
+    var tg=q.labels.map(function(l,j){ return '<button class="tag" data-act="tag" data-c="'+i+'" data-v="'+j+'" aria-pressed="'+(!!S.sel&&S.sel[i]===j)+'">'+l+'</button>'; }).join('');
+    return '<div class="ev"><div><span class="no">#'+(i+1)+' </span>'+esc(c[0])+'</div><div class="tags" role="group" aria-label="證物卡 '+(i+1)+' 的標籤">'+tg+'</div></div>';
+  }).join('')+'</div>';
+}
+function vOverlay(){
+  var c=CH[S.ch], items='';
+  for (var i=0;i<=S.step;i++){
+    var st=c.steps[i];
+    if (st.say||st.clue){ var p=CAST[st.say||st.clue]; items+='<div class="'+(st.clue?'clue ':'')+'talk">'+face(p,40)+'<div style="min-width:0"><div class="who">'+p.n+(st.clue?'・新線索':'')+'</div><div>'+esc(st.t)+'</div></div></div>'; }
+    else if (i===S.step && Q[st.q].ctx.length) items+=Q[st.q].ctx.map(bubble).join('');
+  }
+  return '<div class="ov" role="dialog" aria-modal="true" aria-label="重看情境"><div class="sheet gut"><h2>重看情境</h2>'+items+'<button class="btn" data-act="closectx">回到題目</button></div></div>';
+}
+function vChEnd(){
+  var c=CH[S.ch], last=S.ch===CH.length-1;
+  return topbar('第'+'一二三四五'[S.ch]+'章・'+c.place,'求助卡完成',{left:face(me(),36),r:''})+
+   '<div class="main gut" style="justify-content:center"><div class="panel px badge pop">'+badge(96)+
+   '<h2>獲得「'+c.badge+'」</h2><p style="margin:0">本章 4 題已送出存檔。分數會在老師公布後一起顯示。</p>'+
+   '<button class="btn" data-act="'+(last?'review':'map')+'">'+(last?'前往檢查頁 ▶':'回到校園地圖 ▶')+'</button></div></div>';
+}
+function vReview(){
+  var miss=QIDS.filter(function(id){return !answered(id);});
+  var rows=CH.map(function(c,i){
+    return '<div class="grow"><div class="cn">'+'一二三四五'[i]+'・'+c.place+'</div><div class="qs">'+chQs(i).map(function(id){
+      var ok=answered(id), n=qNum(id), open=chOpen(i);
+      return '<button class="qb'+(ok?'':' miss')+'" data-act="edit" data-q="'+id+'" '+(open?'':'disabled')+' aria-label="第 '+n+' 題，'+(ok?'已作答':'未完成')+'">'+n+'</button>';
+    }).join('')+'</div></div>';
+  }).join('');
+  var conf=S.confirm?'<div class="ov" role="dialog" aria-modal="true" aria-label="確認提交"><div class="sheet gut"><h2>確定要正式提交嗎？</h2><p style="margin:0">提交後就不能再修改答案，每個學號只能提交一次。</p>'+(S.err?'<p class="err" role="alert">'+esc(S.err)+'</p>':'')+'<div class="foot" style="position:static;padding:0;border:0;background:none"><div class="row"><button class="btn ghost small" data-act="noconf">再檢查一下</button><button class="btn" data-act="dosubmit" '+(S.busy?'disabled':'')+'>'+(S.busy?'提交中…':'確定提交')+'</button></div></div></div></div>':'';
+  return topbar('見習報告','提交前檢查',{left:'<button class="iconbtn" data-act="map" aria-label="回到地圖">◀</button>',r:''})+
+   '<div class="main gut"><div class="panel px"><div style="display:flex;justify-content:space-between;align-items:baseline"><b>已作答</b><span class="pf" style="font-size:.85em">'+(20-miss.length)+' / 20</span></div>'+
+   '<div class="grid">'+rows+'</div>'+
+   (miss.length?'<div class="warn">還有 '+miss.length+' 題未完成（紅色）。點題號就能回去作答或修改。</div>':'<div class="ok">20 題都完成了。點題號可以回去修改，確認後再提交。</div>')+'</div>'+
+   '<p class="note" style="color:var(--lilac)">提交前所有題目都能修改；正式提交後不能更改。分數與解析會在老師公布後，從同一個連結查看。</p>'+
+   '<button class="btn" id="askconf" data-act="askconf">正式提交 ▶</button></div>'+conf;
+}
+function vSubmitted(){
+  var t=new Date(S.submittedAt).toLocaleString('zh-TW',{timeZone:'Asia/Taipei',hour12:false});
+  var tail;
+  if (PREVIEW) tail='<div class="panel px" style="background:var(--gold-soft)"><b>教師試玩</b><p class="note" style="color:var(--ink)">這次作答沒有寫入成績。正式版學生要等你公布後才看得到分數。</p><button class="btn" data-act="result">查看分數與解析</button><button class="btn ghost small" style="width:100%" data-act="replay">重新試玩</button></div>';
+  else if (S.result) tail='<div class="panel px" style="background:var(--gold-soft)"><b>成績已公布</b><button class="btn" data-act="result">查看分數與解析 ▶</button></div>';
+  else tail='<p class="note" style="color:var(--lilac);text-align:center">分數與解析會在老師公布後，用同一個連結、同樣的學號與姓名登入查看。</p>';
+  return topbar('見習報告','提交成功',{left:face(me(),36),r:''})+
+   '<div class="main gut" style="justify-content:center"><div class="panel px badge pop">'+badge(80)+
+   '<h2>見習報告已提交</h2><div class="pf" style="font-size:.8em">'+esc(S.code||'')+'</div>'+
+   '<p style="margin:0">提交時間：'+esc(t)+'<br>學號：'+esc(S.sid)+'　姓名：'+esc(S.name)+'</p>'+
+   '<p class="note">建議截圖留存。</p></div>'+tail+'</div>';
+}
+function vResult(){
+  var R=S.result, items='';
+  R.items.forEach(function(it){
+    var body;
+    if (it.kind==='sort') body='<div style="font-size:.9em">'+it.cards.map(function(c){ return '<span class="'+(c.ok?'good':'bad')+'">'+(c.ok?'○ ':'× ')+'</span>'+esc(c.t)+'：'+esc(c.label); }).join('<br>')+'</div>';
+    else body='<div style="font-size:.9em">你的答案：'+esc(it.mine)+'</div>'+(it.score===5?'':'<div style="font-size:.9em">建議答案：'+esc(it.right)+'</div>');
+    items+='<div class="ritem"><div class="h"><span>第 '+it.n+' 題</span><span class="'+(it.score===5?'good':'bad')+'">'+it.score+' / 5</span></div>'+body+'<div class="note" style="color:var(--ink)">'+esc(it.exp)+'</div></div>';
+  });
+  var per=R.per.map(function(v,i){ return '<div><div>'+'一二三四五'[i]+'章</div><b>'+v+'</b>/20</div>'; }).join('');
+  return topbar(PREVIEW?'教師試玩':'期中評量','分數與解析',{left:'<button class="iconbtn" data-act="back" aria-label="回到提交頁">◀</button>',r:''})+
+   '<div class="main gut"><div class="panel px"><div class="score"><span class="big">'+R.total+'</span><span>/ 100　計入學期成績 '+(R.total*0.3).toFixed(1)+' 分</span></div><div class="cs">'+per+'</div>'+items+'</div></div>';
+}
+function vFatal(){
+  return '<div class="ov" role="alertdialog" aria-modal="true" aria-label="無法存檔"><div class="sheet gut"><h2>無法存檔</h2><p style="margin:0">'+esc(S.fatal)+'</p><button class="btn" data-act="relogin">回到登入畫面</button></div></div>';
+}
+
+/* ---------- 流程 ---------- */
+function openQ(){ var st=curStep(); if (st && st.q){ var a=S.ans[st.q], k=Q[st.q].kind; S.sel = a===undefined ? (k==='sort'?{}:null) : (k==='sort'?JSON.parse(JSON.stringify(a)):a); } }
+function enter(i){
+  S.ch=i; S.mode='play';
+  var steps=CH[i].steps, last=-1;
+  steps.forEach(function(s,k){ if (s.q && answered(s.q)) last=k; });
+  S.step = chDone(i) ? 0 : Math.min(last+1, steps.length-1);
+  S.view='chapter'; openQ();
+}
+function advance(){
+  if (S.mode==='edit'){ S.view='review'; return; }
+  if (S.step < CH[S.ch].steps.length-1){ S.step++; openQ(); }
+  else S.view='chend';
+}
+function go(v){ S.view=v; S.overlay=false; S.confirm=false; S.err=''; render(); window.scrollTo(0,0); }
+
+var app=document.getElementById('app');
+function render(){
+  app.className='app'+(S.big?' big':'');
+  var v={loading:vLoading,loaderr:vLoadErr,login:vLogin,rules:vRules,avatar:vAvatar,prologue:vPrologue,map:vMap,chapter:vChapter,chend:vChEnd,review:vReview,submitted:vSubmitted,result:vResult}[S.view];
+  app.innerHTML=v()+(S.fatal?vFatal():'');
+  updSubmitBtn();
+}
+function afterLogin(r){
+  S.sid=r.sid; S.name=r.name; S.tok=r.token||null; S.av=r.av||null; S.ans=r.ans||{}; S.fatal=null; S.queue=[];
+  if (r.status==='submitted'){ S.submittedAt=r.submittedAt; S.code=r.code; S.result=r.result||null; go('submitted'); }
+  else go(S.av?'map':'rules');
+}
+
+app.addEventListener('submit',function(e){
+  if (e.target.id!=='login') return;
+  e.preventDefault();
+  var sid=document.getElementById('sid').value.trim(), nm=document.getElementById('sname').value.trim();
+  S.sid=sid; S.name=nm;
+  if (!sid || !nm){ S.err='請輸入學號和姓名。'; render(); return; }
+  if (PREVIEW){ afterLogin({sid:sid.toUpperCase(),name:nm,av:null,ans:{},status:'new'}); return; }
+  S.err=''; S.busy=true; render();
+  api('login',sid,nm).then(function(r){
+    S.busy=false;
+    if (!r || !r.ok){ S.err=(r&&r.msg)||'登入失敗，請再試一次。'; render(); return; }
+    afterLogin(r);
+  }).catch(function(){ S.busy=false; S.err='連線失敗。請確認網路後再按一次「進入任務」。'; render(); });
+});
+app.addEventListener('change',function(e){ if (e.target.id==='agree'){ S.agreed=e.target.checked; render(); var a=document.getElementById('agree'); if (a) a.focus(); } });
+app.addEventListener('click',function(e){
+  var b=e.target.closest('[data-act]'); if (!b || b.disabled) return;
+  var act=b.getAttribute('data-act');
+  switch(act){
+    case 'font': S.big=!S.big; try{ localStorage.setItem('nkuht-mid-big',S.big?'1':'0'); }catch(err){} render(); break;
+    case 'toAvatar': go('avatar'); break;
+    case 'av': S.av=b.getAttribute('data-id'); render(); break;
+    case 'toPrologue': enqueue({key:'profile',fn:'saveProfile',args:[S.sid,S.tok,S.av]}); S.pstep=0; S.practice=null; go('prologue'); break;
+    case 'psel': S.practice=b.getAttribute('data-id'); render(); break;
+    case 'pnext': if (S.pstep<PRO.length-1){ S.pstep++; render(); window.scrollTo(0,0); } else go('map'); break;
+    case 'map': go('map'); break;
+    case 'enter': enter(+b.getAttribute('data-i')); render(); window.scrollTo(0,0); break;
+    case 'next': advance(); render(); window.scrollTo(0,0); break;
+    case 'sel': var q=Q[curStep().q]; S.sel = q.kind==='tap' ? +b.getAttribute('data-v') : b.getAttribute('data-v'); render(); break;
+    case 'tag': S.sel=S.sel||{}; S.sel[+b.getAttribute('data-c')]=+b.getAttribute('data-v'); render(); break;
+    case 'submitq':
+      if (S.submittedAt) return;
+      var qid=curStep().q, val=S.sel;
+      S.ans[qid]=val;
+      enqueue({key:qid,fn:'saveAnswer',args:[S.sid,S.tok,qid,val]});
+      advance(); render(); window.scrollTo(0,0); break;
+    case 'ctx': S.overlay=true; render(); break;
+    case 'closectx': S.overlay=false; render(); break;
+    case 'review': go('review'); break;
+    case 'edit':
+      var id=b.getAttribute('data-q'), ci=chOf(Q[id].ch);
+      S.ch=ci; S.mode='edit'; S.step=CH[ci].steps.map(function(s){return s.q;}).indexOf(id); S.view='chapter'; openQ(); render(); window.scrollTo(0,0); break;
+    case 'askconf': S.confirm=true; S.err=''; render(); break;
+    case 'noconf': S.confirm=false; render(); break;
+    case 'dosubmit':
+      S.busy=true; render();
+      var p = PREVIEW ? api('previewScore',PREVIEW_KEY,S.ans) : api('submit',S.sid,S.tok);
+      p.then(function(r){
+        S.busy=false;
+        if (!r || !r.ok){ S.err=(r&&r.msg)||'提交失敗，請再試一次。'; render(); return; }
+        if (PREVIEW){ S.result=r.result; S.submittedAt=Date.now(); S.code='教師試玩'; }
+        else { S.submittedAt=r.submittedAt; S.code=r.code; S.result=null; }
+        go('submitted');
+      }).catch(function(){ S.busy=false; S.err='連線失敗，答案還沒有提交。請確認網路後再按一次「確定提交」。'; render(); });
+      break;
+    case 'result': go('result'); break;
+    case 'back': go('submitted'); break;
+    case 'replay': S.ans={}; S.av=null; S.submittedAt=null; S.code=null; S.result=null; S.agreed=false; go('login'); break;
+    case 'boot': boot(); break;
+    case 'relogin': S.fatal=null; S.queue=[]; S.tok=null; go('login'); break;
+  }
+});
+app.addEventListener('keydown',function(e){ if (e.key==='Escape' && (S.overlay||S.confirm)){ S.overlay=false; S.confirm=false; render(); } });
+function boot(){
+  S.view='loading'; render();
+  api('bank',PREVIEW_KEY).then(function(r){
+    if (!r || !r.ok || !r.bank) throw new Error('bad');
+    Q=r.bank; QIDS=Object.keys(Q); BOOT={rules:r.rules||{}}; PREVIEW=!!r.preview;
+    S.view='login'; render();
+  }).catch(function(){ S.view='loaderr'; render(); });
+}
+boot();
+})();
+</script>
+</body>
+</html>
